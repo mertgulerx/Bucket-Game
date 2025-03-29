@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
@@ -35,6 +36,8 @@ public class Main implements ApplicationListener {
     private Integer score;
     private float dropSpeed;
     private float moveSpeed;
+    private float dropRate;
+    private float increment;
 
     @Override
     public void create() {
@@ -58,6 +61,10 @@ public class Main implements ApplicationListener {
         music.setVolume(0.3f);
         music.play();
         score = 0;
+        increment = 0;
+        moveSpeed = 3f;
+        dropSpeed = 1f;
+        dropRate = 2f;
         // Prepare your application here.
     }
 
@@ -95,12 +102,11 @@ public class Main implements ApplicationListener {
     }
 
     private void input(){
-        float speed = 2f;
         float delta = Gdx.graphics.getDeltaTime();
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
-            bucketSprite.translateX(speed * delta);
+            bucketSprite.translateX(moveSpeed * delta);
         } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)){
-            bucketSprite.translateX(-speed * delta);
+            bucketSprite.translateX(-moveSpeed * delta);
         }
 
         if (Gdx.input.isTouched()){
@@ -127,7 +133,7 @@ public class Main implements ApplicationListener {
             float dropWidth = dropSprite.getWidth();
             float dropHeight = dropSprite.getHeight();
 
-            dropSprite.translateY(-2f * delta);
+            dropSprite.translateY(-dropSpeed * delta);
 
             dropRectangle.set(dropSprite.getX(), dropSprite.getY(), dropWidth, dropHeight);
 
@@ -136,11 +142,20 @@ public class Main implements ApplicationListener {
             } else if (bucketRectangle.overlaps(dropRectangle)){
                 dropSprites.removeIndex(i);
                 dropSound.play();
+                score += 10;
+                increment += 10;
             }
         }
 
+        if (increment % 100 == 0 && increment >= 100){
+            dropSpeed += 0.05f;
+            dropRate -= 0.05f;
+            increment -= 100;
+        }
+
+
         dropTimer += delta;
-        if (dropTimer > 1f){
+        if (dropTimer > dropRate){
             dropTimer = 0;
             createDroplet();
         }
